@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iperf3-client
+  labels:
+    app: iperf3-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iperf3-client
+  template:
+    metadata:
+      labels:
+        app: iperf3-client
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - iperf3-server
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: iperf3-client
+        image: networkstatic/iperf3
+        imagePullPolicy: Always
+        args:
+        - -c
+        - iperf3-server-service
+        - --time
+        - "600"
+
+

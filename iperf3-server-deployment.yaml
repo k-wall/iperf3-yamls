@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iperf3-server
+  labels:
+    app: iperf3-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iperf3-server
+  template:
+    metadata:
+      labels:
+        app: iperf3-server
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - iperf3-client
+            topologyKey: "kubernetes.io/hostname"
+      name: iperf3-server
+      containers:
+      - name: iperf3-server
+        image: networkstatic/iperf3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        args:
+          - -s
+        ports:
+        - containerPort: 5201
+          protocol: TCP
+
+
